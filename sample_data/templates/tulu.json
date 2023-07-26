@@ -1,0 +1,6 @@
+{
+  "description": "The format used by allenai's Tulu & Open Instruct",
+  "prompt_input": "<|user|>\n{instruction}\n<|input|>\n{input}\n<|assistant|>\n",
+  "prompt_no_input": "<|user|>\n{instruction}\n<|assistant|>\n",
+  "response_split": "<|assistant|>"
+}
