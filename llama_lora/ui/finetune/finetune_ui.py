@@ -561,13 +561,13 @@ def finetune_ui():
 
             with gr.Column():
                 lora_r = gr.Slider(
-                    minimum=1, maximum=16, step=1, value=8,
+                    minimum=1, maximum=256, step=1, value=8,
                     label="LoRA R",
                     info="The rank parameter for LoRA, which controls the dimensionality of the rank decomposition matrices. A larger lora_r increases the expressiveness and flexibility of LoRA but also increases the number of trainable parameters and memory usage."
                 )
 
                 lora_alpha = gr.Slider(
-                    minimum=1, maximum=128, step=1, value=16,
+                    minimum=1, maximum=512, step=1, value=16,
                     label="LoRA Alpha",
                     info="The scaling parameter for LoRA, which controls how much LoRA affects the original pre-trained model weights. A larger lora_alpha amplifies the impact of LoRA but may also distort or override the pre-trained knowledge."
                 )
@@ -665,7 +665,7 @@ def finetune_ui():
                         save_steps = gr.Number(
                             label="Steps Per Save",
                             precision=0,
-                            value=500,
+                            value=1000,
                             elem_id="finetune_save_steps"
                         )
                         save_total_limit = gr.Number(
