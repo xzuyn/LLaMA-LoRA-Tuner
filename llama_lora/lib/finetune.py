@@ -243,6 +243,9 @@ def train(
     # tokenizer.pad_token_id = (
     #     0  # unk. we want this to be different from the eos token
     # )
+    if tokenizer.pad_token is None:
+        print(f"Tokenizer has no pad_token set, setting it to 1.")
+        tokenizer.pad_token_id = 1
     tokenizer.padding_side = "left"  # Allow batched inference
 
     try:
