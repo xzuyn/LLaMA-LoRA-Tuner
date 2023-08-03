@@ -67,10 +67,12 @@ def reload_selections(current_template, current_dataset):
     return (
         gr.Dropdown.update(
             choices=available_template_names_with_none,
-            value=current_template),
+            value=current_template
+        ),
         gr.Dropdown.update(
             choices=available_dataset_names,
-            value=current_dataset),
+            value=current_dataset
+        ),
         gr.Dropdown.update(choices=available_lora_models)
     )
 
@@ -82,16 +84,16 @@ def handle_switch_dataset_source(source):
         return gr.Column.update(visible=False), gr.Column.update(visible=True)
 
 
-def handle_switch_dataset_text_format(format):
-    if format == "Plain Text":
+def handle_switch_dataset_text_format(hsd_text_format):
+    if hsd_text_format == "Plain Text":
         return gr.Column.update(visible=True)
     return gr.Column.update(visible=False)
 
 
-def load_sample_dataset_to_text_input(format):
-    if format == "JSON":
+def load_sample_dataset_to_text_input(lsdt_text_input):
+    if lsdt_text_input == "JSON":
         return gr.Code.update(value=sample_json_text_value)
-    if format == "JSON Lines":
+    if lsdt_text_input == "JSON Lines":
         return gr.Code.update(value=sample_jsonl_text_value)
     else:  # Plain Text
         return gr.Code.update(value=sample_plain_text_value)
@@ -104,55 +106,68 @@ def handle_continue_from_model_change(model_name):
         lora_model_directory_path = os.path.join(
             lora_models_directory_path, model_name)
         all_files = os.listdir(lora_model_directory_path)
-        checkpoints = [
-            file for file in all_files if file.startswith("checkpoint-")]
+        checkpoints = [file for file in all_files if file.startswith("checkpoint-")]
         checkpoints = ["-"] + checkpoints
         can_load_params = "finetune_params.json" in all_files or "finetune_args.json" in all_files
-        return (gr.Dropdown.update(choices=checkpoints, value="-"),
-                gr.Button.update(visible=can_load_params),
-                gr.Markdown.update(value="", visible=False))
+        return (
+            gr.Dropdown.update(
+                choices=checkpoints,
+                value="-"
+            ),
+            gr.Button.update(visible=can_load_params),
+            gr.Markdown.update(
+                value="",
+                visible=False
+            )
+        )
     except Exception:
         pass
-    return (gr.Dropdown.update(choices=["-"], value="-"),
-            gr.Button.update(visible=False),
-            gr.Markdown.update(value="", visible=False))
+    return (
+        gr.Dropdown.update(
+            choices=["-"],
+            value="-"
+        ),
+        gr.Button.update(visible=False),
+        gr.Markdown.update(
+            value="",
+            visible=False
+        )
+    )
 
 
 def handle_load_params_from_model(
-    model_name,
-    template, load_dataset_from, dataset_from_data_dir,
-    max_seq_length,
-    evaluate_data_count,
-    micro_batch_size,
-    gradient_accumulation_steps,
-    epochs,
-    learning_rate,
-    train_on_inputs,
-    lora_r,
-    lora_alpha,
-    lora_dropout,
-    lora_target_modules,
-    lora_modules_to_save,
-    load_in_8bit,
-    fp16,
-    bf16,
-    gradient_checkpointing,
-    save_steps,
-    save_total_limit,
-    logging_steps,
-    additional_training_arguments,
-    additional_lora_config,
-    lora_target_module_choices,
-    lora_modules_to_save_choices,
+        model_name,
+        template, load_dataset_from, dataset_from_data_dir,
+        max_seq_length,
+        evaluate_data_count,
+        micro_batch_size,
+        gradient_accumulation_steps,
+        epochs,
+        learning_rate,
+        train_on_inputs,
+        lora_r,
+        lora_alpha,
+        lora_dropout,
+        lora_target_modules,
+        lora_modules_to_save,
+        load_in_8bit,
+        fp16,
+        bf16,
+        gradient_checkpointing,
+        save_steps,
+        save_total_limit,
+        logging_steps,
+        additional_training_arguments,
+        additional_lora_config,
+        lora_target_module_choices,
+        lora_modules_to_save_choices,
 ):
     error_message = ""
     notice_message = ""
     unknown_keys = []
     try:
-        lora_models_directory_path = os.path.join(
-            Config.data_dir, "lora_models")
-        lora_model_directory_path = os.path.join(
-            lora_models_directory_path, model_name)
+        lora_models_directory_path = os.path.join(Config.data_dir, "lora_models")
+        lora_model_directory_path = os.path.join(lora_models_directory_path, model_name)
 
         try:
             with open(os.path.join(lora_model_directory_path, "info.json"), "r") as f:
@@ -162,7 +177,11 @@ def handle_load_params_from_model(
                     if model_prompt_template:
                         template = model_prompt_template
                     model_dataset_name = info.get("dataset_name")
-                    if model_dataset_name and isinstance(model_dataset_name, str) and not model_dataset_name.startswith("N/A"):
+                    if (
+                            model_dataset_name
+                            and isinstance(model_dataset_name, str)
+                            and not model_dataset_name.startswith("N/A")
+                    ):
                         load_dataset_from = "Data Dir"
                         dataset_from_data_dir = model_dataset_name
         except FileNotFoundError:
@@ -260,7 +279,10 @@ def handle_load_params_from_model(
         has_message = True
 
     return (
-        gr.Markdown.update(value=message, visible=has_message),
+        gr.Markdown.update(
+            value=message,
+            visible=has_message
+        ),
         template, load_dataset_from, dataset_from_data_dir,
         max_seq_length,
         evaluate_data_count,
@@ -272,10 +294,14 @@ def handle_load_params_from_model(
         lora_r,
         lora_alpha,
         lora_dropout,
-        gr.CheckboxGroup.update(value=lora_target_modules,
-                                choices=lora_target_module_choices),
         gr.CheckboxGroup.update(
-            value=lora_modules_to_save, choices=lora_modules_to_save_choices),
+            value=lora_target_modules,
+            choices=lora_target_module_choices
+        ),
+        gr.CheckboxGroup.update(
+            value=lora_modules_to_save,
+            choices=lora_modules_to_save_choices
+        ),
         load_in_8bit,
         fp16,
         bf16,
@@ -294,18 +320,32 @@ default_lora_target_module_choices = ["q_proj", "k_proj", "v_proj", "o_proj"]
 default_lora_modules_to_save_choices = ["model.embed_tokens", "lm_head"]
 
 
-def handle_lora_target_modules_add(choices, new_module, selected_modules):
+def handle_lora_target_modules_add(
+        choices,
+        new_module,
+        selected_modules
+):
     choices.append(new_module)
     selected_modules.append(new_module)
 
-    return (choices, "", gr.CheckboxGroup.update(value=selected_modules, choices=choices))
+    return (
+        choices,
+        "",
+        gr.CheckboxGroup.update(
+            value=selected_modules,
+            choices=choices
+        )
+    )
 
 
 def handle_lora_modules_to_save_add(choices, new_module, selected_modules):
     choices.append(new_module)
     selected_modules.append(new_module)
 
-    return (choices, "", gr.CheckboxGroup.update(value=selected_modules, choices=choices))
+    return choices, "", gr.CheckboxGroup.update(
+        value=selected_modules,
+        choices=choices
+    )
 
 
 def do_abort_training():
@@ -326,20 +366,25 @@ def finetune_ui():
                             elem_id="finetune_template",
                         )
                         load_dataset_from = gr.Radio(
-                            ["Text Input", "Data Dir"],
+                            [
+                                "Text Input",
+                                "Data Dir"
+                            ],
                             label="Load Dataset From",
                             value="Text Input",
-                            elem_id="finetune_load_dataset_from")
+                            elem_id="finetune_load_dataset_from"
+                        )
                         reload_selections_button = gr.Button(
                             "↻",
                             elem_id="finetune_reload_selections_button"
                         )
                         reload_selections_button.style(
                             full_width=False,
-                            size="sm")
+                            size="sm"
+                        )
                     with gr.Column(
-                        elem_id="finetune_dataset_from_data_dir_group",
-                        visible=False
+                            elem_id="finetune_dataset_from_data_dir_group",
+                            visible=False
                     ) as dataset_from_data_dir_group:
                         dataset_from_data_dir = gr.Dropdown(
                             label="Dataset",
@@ -348,60 +393,87 @@ def finetune_ui():
                         dataset_from_data_dir_message = gr.Markdown(
                             "",
                             visible=False,
-                            elem_id="finetune_dataset_from_data_dir_message")
+                            elem_id="finetune_dataset_from_data_dir_message"
+                        )
                 with gr.Box(elem_id="finetune_dataset_text_input_group") as dataset_text_input_group:
                     gr.Textbox(
-                        label="Training Data", elem_classes="textbox_that_is_only_used_to_display_a_label")
+                        label="Training Data",
+                        elem_classes="textbox_that_is_only_used_to_display_a_label"
+                    )
                     dataset_text = gr.Code(
                         show_label=False,
                         language="json",
                         value=sample_plain_text_value,
                         # max_lines=40,
-                        elem_id="finetune_dataset_text_input_textbox")
+                        elem_id="finetune_dataset_text_input_textbox"
+                    )
                     dataset_from_text_message = gr.Markdown(
                         "",
                         visible=False,
-                        elem_id="finetune_dataset_from_text_message")
+                        elem_id="finetune_dataset_from_text_message"
+                    )
                     gr.Markdown(
-                        "The data you entered here will not be saved. Do not make edits here directly. Instead, edit the data elsewhere then paste it here.")
+                        "The data you entered here will not be saved. Do not make edits here directly. Instead, "
+                        "edit the data elsewhere then paste it here."
+                    )
                     with gr.Row():
                         with gr.Column():
                             dataset_text_format = gr.Radio(
-                                ["Plain Text", "JSON Lines", "JSON"],
-                                label="Format", value="Plain Text", elem_id="finetune_dataset_text_format")
+                                [
+                                    "Plain Text",
+                                    "JSON Lines",
+                                    "JSON"
+                                ],
+                                label="Format",
+                                value="Plain Text",
+                                elem_id="finetune_dataset_text_format"
+                            )
                             dataset_text_load_sample_button = gr.Button(
-                                "Load Sample", elem_id="finetune_dataset_text_load_sample_button")
+                                "Load Sample",
+                                elem_id="finetune_dataset_text_load_sample_button"
+                            )
                             dataset_text_load_sample_button.style(
                                 full_width=False,
-                                size="sm")
-                        with gr.Column(elem_id="finetune_dataset_plain_text_separators_group") as dataset_plain_text_separators_group:
+                                size="sm"
+                            )
+                        with (
+                            gr.Column(
+                                elem_id="finetune_dataset_plain_text_separators_group"
+                            ) as dataset_plain_text_separators_group
+                        ):
                             dataset_plain_text_input_variables_separator = gr.Textbox(
                                 label="Input Variables Separator",
                                 elem_id="dataset_plain_text_input_variables_separator",
                                 placeholder=default_dataset_plain_text_input_variables_separator,
-                                value=default_dataset_plain_text_input_variables_separator)
+                                value=default_dataset_plain_text_input_variables_separator
+                            )
                             dataset_plain_text_input_and_output_separator = gr.Textbox(
                                 label="Input and Output Separator",
                                 elem_id="dataset_plain_text_input_and_output_separator",
                                 placeholder=default_dataset_plain_text_input_and_output_separator,
-                                value=default_dataset_plain_text_input_and_output_separator)
+                                value=default_dataset_plain_text_input_and_output_separator
+                            )
                             dataset_plain_text_data_separator = gr.Textbox(
                                 label="Data Separator",
                                 elem_id="dataset_plain_text_data_separator",
                                 placeholder=default_dataset_plain_text_data_separator,
-                                value=default_dataset_plain_text_data_separator)
+                                value=default_dataset_plain_text_data_separator
+                            )
                         things_that_might_timeout.append(
                             dataset_text_format.change(
                                 fn=handle_switch_dataset_text_format,
                                 inputs=[dataset_text_format],
-                                outputs=[
-                                    dataset_plain_text_separators_group  # type: ignore
-                                ]
-                            ))
+                                outputs=[dataset_plain_text_separators_group]  # type: ignore
+                            )
+                        )
 
                     things_that_might_timeout.append(
-                        dataset_text_load_sample_button.click(fn=load_sample_dataset_to_text_input, inputs=[
-                            dataset_text_format], outputs=[dataset_text]))
+                        dataset_text_load_sample_button.click(
+                            fn=load_sample_dataset_to_text_input,
+                            inputs=[dataset_text_format],
+                            outputs=[dataset_text]
+                        )
+                    )
                 gr.Markdown(
                     "💡 Switch to the \"Preview\" tab to verify that your inputs are correct.")
             with gr.Tab("Preview"):
@@ -419,16 +491,16 @@ def finetune_ui():
                         elem_id="finetune_dataset_preview_count"
                     )
                 finetune_dataset_preview = gr.Dataframe(
-                    wrap=True, elem_id="finetune_dataset_preview")
+                    wrap=True,
+                    elem_id="finetune_dataset_preview"
+                )
             things_that_might_timeout.append(
                 load_dataset_from.change(
                     fn=handle_switch_dataset_source,
                     inputs=[load_dataset_from],
-                    outputs=[
-                        dataset_text_input_group,
-                        dataset_from_data_dir_group
-                    ]  # type: ignore
-                ))
+                    outputs=[dataset_text_input_group, dataset_from_data_dir_group]  # type: ignore
+                )
+            )
 
             dataset_inputs = [
                 template,
@@ -440,14 +512,16 @@ def finetune_ui():
                 dataset_plain_text_input_and_output_separator,
                 dataset_plain_text_data_separator,
             ]
-            dataset_preview_inputs = dataset_inputs + \
-                [finetune_dataset_preview_count]
+            dataset_preview_inputs = dataset_inputs + [finetune_dataset_preview_count]
 
             with gr.Row():
                 max_seq_length = gr.Slider(
-                    minimum=1, maximum=4096, value=512,
+                    minimum=1,
+                    maximum=4096,
+                    value=512,
                     label="Max Sequence Length",
-                    info="The maximum length of each sample text sequence. Sequences longer than this will be truncated.",
+                    info="The maximum length of each sample text sequence. Sequences longer than this will be "
+                         "truncated.",
                     elem_id="finetune_max_seq_length"
                 )
 
@@ -472,49 +546,92 @@ def finetune_ui():
 
             with gr.Column():
                 micro_batch_size = gr.Slider(
-                    minimum=1, maximum=100, step=1, value=micro_batch_size_default_value,
+                    minimum=1,
+                    maximum=100,
+                    step=1,
+                    value=micro_batch_size_default_value,
                     label="Micro Batch Size",
-                    info="The number of examples in each mini-batch for gradient computation. A smaller micro_batch_size reduces memory usage but may increase training time."
+                    info="The number of examples in each mini-batch for gradient computation. A smaller "
+                         "micro_batch_size reduces memory usage but may increase training time."
                 )
 
                 gradient_accumulation_steps = gr.Slider(
-                    minimum=1, maximum=10, step=1, value=1,
+                    minimum=1,
+                    maximum=10,
+                    step=1,
+                    value=1,
                     label="Gradient Accumulation Steps",
-                    info="The number of steps to accumulate gradients before updating model parameters. This can be used to simulate a larger effective batch size without increasing memory usage."
+                    info="The number of steps to accumulate gradients before updating model parameters. "
+                         "This can be used to simulate a larger effective batch size without increasing memory usage."
                 )
 
                 epochs = gr.Slider(
-                    minimum=1, maximum=100, step=1, value=10,
+                    minimum=1,
+                    maximum=100,
+                    step=1,
+                    value=3,
                     label="Epochs",
-                    info="The number of times to iterate over the entire training dataset. A larger number of epochs may improve model performance but also increase the risk of overfitting.")
+                    info="The number of times to iterate over the entire training dataset. "
+                         "A larger number of epochs may improve model performance but also increase the risk of "
+                         "overfitting."
+                )
 
                 learning_rate = gr.Slider(
-                    minimum=0.00001, maximum=0.01, value=3e-4,
+                    minimum=0.00001,
+                    maximum=0.01,
+                    value=3e-4,
                     label="Learning Rate",
-                    info="The initial learning rate for the optimizer. A higher learning rate may speed up convergence but also cause instability or divergence. A lower learning rate may require more steps to reach optimal performance but also avoid overshooting or oscillating around local minima."
+                    info="The initial learning rate for the optimizer. A higher learning rate may speed up "
+                         "convergence but also cause instability or divergence. A lower learning rate may require "
+                         "more steps to reach optimal performance but also avoid overshooting or oscillating around "
+                         "local minima."
                 )
 
                 with gr.Column(elem_id="finetune_eval_data_group"):
                     evaluate_data_count = gr.Slider(
-                        minimum=0, maximum=1, step=1, value=0,
+                        minimum=0,
+                        maximum=1,
+                        step=1,
+                        value=0,
                         label="Evaluation Data Count",
-                        info="The number of data to be used for evaluation. This specific amount of data will be randomly chosen from the training dataset for evaluating the model's performance during the process, without contributing to the actual training.",
+                        info="The number of data to be used for evaluation. This specific amount of data will be "
+                             "randomly chosen from the training dataset for evaluating the model's performance during "
+                             "the process, without contributing to the actual training.",
                         elem_id="finetune_evaluate_data_count"
                     )
                 gr.HTML(elem_classes="flex_vertical_grow_area")
 
-                with gr.Accordion("Advanced Options", open=False, elem_id="finetune_advance_options_accordion"):
+                with gr.Accordion(
+                        "Advanced Options",
+                        open=False,
+                        elem_id="finetune_advance_options_accordion"
+                ):
                     with gr.Row(elem_id="finetune_advanced_options_checkboxes"):
                         load_in_8bit = gr.Checkbox(
-                            label="8bit", value=Config.load_8bit)
-                        fp16 = gr.Checkbox(label="FP16", value=True)
-                        bf16 = gr.Checkbox(label="BF16", value=False)
+                            label="8bit",
+                            value=Config.load_8bit
+                        )
+                        fp16 = gr.Checkbox(
+                            label="FP16",
+                            value=True
+                        )
+                        bf16 = gr.Checkbox(
+                            label="BF16",
+                            value=False
+                        )
                         gradient_checkpointing = gr.Checkbox(
-                            label="gradient_checkpointing", value=False)
-                    with gr.Column(variant="panel", elem_id="finetune_additional_training_arguments_box"):
+                            label="gradient_checkpointing",
+                            value=False
+                        )
+                    with gr.Column(
+                            variant="panel",
+                            elem_id="finetune_additional_training_arguments_box"
+                    ):
                         gr.Textbox(
                             label="Additional Training Arguments",
-                            info="Additional training arguments to be passed to the Trainer. Note that this can override ALL other arguments set elsewhere. See https://bit.ly/hf20-transformers-training-arguments for more details.",
+                            info="Additional training arguments to be passed to the Trainer. Note that this can "
+                                 "override ALL other arguments set elsewhere. "
+                                 "See https://bit.ly/hf20-transformers-training-arguments for more details.",
                             elem_id="finetune_additional_training_arguments_textbox_for_label_display"
                         )
                         additional_training_arguments = gr.Code(
@@ -522,7 +639,8 @@ def finetune_ui():
                             language="json",
                             value="",
                             lines=2,
-                            elem_id="finetune_additional_training_arguments")
+                            elem_id="finetune_additional_training_arguments"
+                        )
 
                 with gr.Box(elem_id="finetune_continue_from_model_box"):
                     with gr.Row():
@@ -537,15 +655,21 @@ def finetune_ui():
                             value="-",
                             label="Resume from Checkpoint",
                             choices=["-"],
-                            elem_id="finetune_continue_from_checkpoint")
+                            elem_id="finetune_continue_from_checkpoint"
+                        )
                     with gr.Column():
                         load_params_from_model_btn = gr.Button(
-                            "Load training parameters from selected model", visible=False)
+                            "Load training parameters from selected model",
+                            visible=False
+                        )
                         load_params_from_model_btn.style(
                             full_width=False,
-                            size="sm")
+                            size="sm"
+                        )
                         load_params_from_model_message = gr.Markdown(
-                            "", visible=False)
+                            "",
+                            visible=False
+                        )
 
                     things_that_might_timeout.append(
                         continue_from_model.change(
@@ -561,37 +685,52 @@ def finetune_ui():
 
             with gr.Column():
                 lora_r = gr.Slider(
-                    minimum=1, maximum=256, step=1, value=8,
+                    minimum=1,
+                    maximum=256,
+                    step=1,
+                    value=16,
                     label="LoRA R",
-                    info="The rank parameter for LoRA, which controls the dimensionality of the rank decomposition matrices. A larger lora_r increases the expressiveness and flexibility of LoRA but also increases the number of trainable parameters and memory usage."
+                    info="The rank parameter for LoRA, which controls the dimensionality of the rank decomposition "
+                         "matrices. A larger lora_r increases the expressiveness and flexibility of LoRA but also "
+                         "increases the number of trainable parameters and memory usage."
                 )
 
                 lora_alpha = gr.Slider(
-                    minimum=1, maximum=512, step=1, value=16,
+                    minimum=1,
+                    maximum=512,
+                    step=1,
+                    value=16,
                     label="LoRA Alpha",
-                    info="The scaling parameter for LoRA, which controls how much LoRA affects the original pre-trained model weights. A larger lora_alpha amplifies the impact of LoRA but may also distort or override the pre-trained knowledge."
+                    info="The scaling parameter for LoRA, which controls how much LoRA affects the original "
+                         "pre-trained model weights. A larger lora_alpha amplifies the impact of LoRA but may also "
+                         "distort or override the pre-trained knowledge."
                 )
 
                 lora_dropout = gr.Slider(
-                    minimum=0, maximum=1, value=0.05,
+                    minimum=0,
+                    maximum=1,
+                    value=0.05,
                     label="LoRA Dropout",
-                    info="The dropout probability for LoRA, which controls the fraction of LoRA parameters that are set to zero during training. A larger lora_dropout increases the regularization effect of LoRA but also increases the risk of underfitting."
+                    info="The dropout probability for LoRA, which controls the fraction of LoRA parameters that "
+                         "are set to zero during training. A larger lora_dropout increases the regularization effect "
+                         "of LoRA but also increases the risk of underfitting."
                 )
 
                 with gr.Column(elem_id="finetune_lora_target_modules_box"):
                     lora_target_modules = gr.CheckboxGroup(
                         label="LoRA Target Modules",
                         choices=default_lora_target_module_choices,
-                        value=["q_proj", "v_proj"],
+                        value=["q_proj", "k_proj", "v_proj", "o_proj"],
                         info="Modules to replace with LoRA.",
                         elem_id="finetune_lora_target_modules"
                     )
-                    lora_target_module_choices = gr.State(
-                        value=default_lora_target_module_choices)  # type: ignore
+                    lora_target_module_choices = gr.State(value=default_lora_target_module_choices)  # type: ignore
                     with gr.Box(elem_id="finetune_lora_target_modules_add_box"):
                         with gr.Row():
                             lora_target_modules_add = gr.Textbox(
-                                lines=1, max_lines=1, show_label=False,
+                                lines=1,
+                                max_lines=1,
+                                show_label=False,
                                 elem_id="finetune_lora_target_modules_add"
                             )
                             lora_target_modules_add_btn = gr.Button(
@@ -599,16 +738,22 @@ def finetune_ui():
                                 elem_id="finetune_lora_target_modules_add_btn"
                             )
                             lora_target_modules_add_btn.style(
-                                full_width=False, size="sm")
-                    things_that_might_timeout.append(lora_target_modules_add_btn.click(
-                        handle_lora_target_modules_add,
-                        inputs=[lora_target_module_choices,
-                                lora_target_modules_add, lora_target_modules],
-                        outputs=[lora_target_module_choices,
-                                 lora_target_modules_add, lora_target_modules],
-                    ))
+                                full_width=False,
+                                size="sm"
+                            )
+                    things_that_might_timeout.append(
+                        lora_target_modules_add_btn.click(
+                            handle_lora_target_modules_add,
+                            inputs=[lora_target_module_choices, lora_target_modules_add, lora_target_modules],
+                            outputs=[lora_target_module_choices, lora_target_modules_add, lora_target_modules],
+                        )
+                    )
 
-                with gr.Accordion("Advanced LoRA Options", open=False, elem_id="finetune_advance_lora_options_accordion"):
+                with gr.Accordion(
+                        "Advanced LoRA Options",
+                        open=False,
+                        elem_id="finetune_advance_lora_options_accordion"
+                ):
                     with gr.Column(elem_id="finetune_lora_modules_to_save_box"):
                         lora_modules_to_save = gr.CheckboxGroup(
                             label="LoRA Modules To Save",
@@ -618,11 +763,14 @@ def finetune_ui():
                             elem_id="finetune_lora_modules_to_save"
                         )
                         lora_modules_to_save_choices = gr.State(
-                            value=default_lora_modules_to_save_choices)  # type: ignore
+                            value=default_lora_modules_to_save_choices
+                        )  # type: ignore
                         with gr.Box(elem_id="finetune_lora_modules_to_save_add_box"):
                             with gr.Row():
                                 lora_modules_to_save_add = gr.Textbox(
-                                    lines=1, max_lines=1, show_label=False,
+                                    lines=1,
+                                    max_lines=1,
+                                    show_label=False,
                                     elem_id="finetune_lora_modules_to_save_add"
                                 )
                                 lora_modules_to_save_add_btn = gr.Button(
@@ -630,19 +778,25 @@ def finetune_ui():
                                     elem_id="finetune_lora_modules_to_save_add_btn"
                                 )
                                 lora_modules_to_save_add_btn.style(
-                                    full_width=False, size="sm")
-                        things_that_might_timeout.append(lora_modules_to_save_add_btn.click(
-                            handle_lora_modules_to_save_add,
-                            inputs=[lora_modules_to_save_choices,
-                                    lora_modules_to_save_add, lora_modules_to_save],
-                            outputs=[lora_modules_to_save_choices,
-                                     lora_modules_to_save_add, lora_modules_to_save],
-                        ))
+                                    full_width=False,
+                                    size="sm"
+                                )
+                        things_that_might_timeout.append(
+                            lora_modules_to_save_add_btn.click(
+                                handle_lora_modules_to_save_add,
+                                inputs=[lora_modules_to_save_choices, lora_modules_to_save_add, lora_modules_to_save],
+                                outputs=[lora_modules_to_save_choices, lora_modules_to_save_add, lora_modules_to_save],
+                            )
+                        )
 
-                    with gr.Column(variant="panel", elem_id="finetune_additional_lora_config_box"):
+                    with gr.Column(
+                            variant="panel",
+                            elem_id="finetune_additional_lora_config_box"
+                    ):
                         gr.Textbox(
                             label="Additional LoRA Config",
-                            info="Additional LoraConfig. Note that this can override ALL other arguments set elsewhere.",
+                            info="Additional LoraConfig. Note that this can override ALL other arguments "
+                                 "set elsewhere.",
                             elem_id="finetune_additional_lora_config_textbox_for_label_display"
                         )
                         additional_lora_config = gr.Code(
@@ -665,7 +819,7 @@ def finetune_ui():
                         save_steps = gr.Number(
                             label="Steps Per Save",
                             precision=0,
-                            value=1000,
+                            value=500,
                             elem_id="finetune_save_steps"
                         )
                         save_total_limit = gr.Number(
@@ -677,7 +831,9 @@ def finetune_ui():
 
                 with gr.Column(elem_id="finetune_model_name_group"):
                     model_name = gr.Textbox(
-                        lines=1, label="LoRA Model Name", value=random_name,
+                        lines=1,
+                        label="LoRA Model Name",
+                        value=random_name,
                         max_lines=1,
                         info="The name of the new LoRA model.",
                         elem_id="finetune_model_name",
@@ -687,27 +843,33 @@ def finetune_ui():
             with gr.Column():
                 pass
             with gr.Column():
-
                 with gr.Row():
                     train_btn = gr.Button(
-                        "Train", variant="primary", label="Train",
+                        "Train",
+                        variant="primary",
+                        label="Train",
                         elem_id="finetune_start_btn"
                     )
 
                     abort_button = gr.Button(
-                        "Abort", label="Abort",
+                        "Abort",
+                        label="Abort",
                         elem_id="finetune_stop_btn"
                     )
                     confirm_abort_button = gr.Button(
-                        "Confirm Abort", label="Confirm Abort", variant="stop",
+                        "Confirm Abort",
+                        label="Confirm Abort",
+                        variant="stop",
                         elem_id="finetune_confirm_stop_btn"
                     )
 
-        things_that_might_timeout.append(reload_selections_button.click(
-            reload_selections,
-            inputs=[template, dataset_from_data_dir],
-            outputs=[template, dataset_from_data_dir, continue_from_model],
-        ))
+        things_that_might_timeout.append(
+            reload_selections_button.click(
+                reload_selections,
+                inputs=[template, dataset_from_data_dir],
+                outputs=[template, dataset_from_data_dir, continue_from_model],
+            )
+        )
 
         for i in dataset_preview_inputs:
             things_that_might_timeout.append(
@@ -729,7 +891,8 @@ def finetune_ui():
                         dataset_from_data_dir_message,
                         evaluate_data_count,
                     ]
-                ))
+                )
+            )
 
         finetune_args = [
             max_seq_length,
@@ -759,16 +922,16 @@ def finetune_ui():
             load_params_from_model_btn.click(
                 fn=handle_load_params_from_model,
                 inputs=(
-                    [continue_from_model] +
-                    [template, load_dataset_from, dataset_from_data_dir] +
-                    finetune_args +
-                    [lora_target_module_choices, lora_modules_to_save_choices]
+                        [continue_from_model] +
+                        [template, load_dataset_from, dataset_from_data_dir] +
+                        finetune_args +
+                        [lora_target_module_choices, lora_modules_to_save_choices]
                 ),  # type: ignore
                 outputs=(
-                    [load_params_from_model_message] +
-                    [template, load_dataset_from, dataset_from_data_dir] +
-                    finetune_args +
-                    [lora_target_module_choices, lora_modules_to_save_choices]
+                        [load_params_from_model_message] +
+                        [template, load_dataset_from, dataset_from_data_dir] +
+                        finetune_args +
+                        [lora_target_module_choices, lora_modules_to_save_choices]
                 )  # type: ignore
             )
         )
@@ -776,29 +939,35 @@ def finetune_ui():
         train_status = gr.HTML(
             "",
             label="Train Output",
-            elem_id="finetune_training_status")
+            elem_id="finetune_training_status"
+        )
 
-        with gr.Column(visible=False, elem_id="finetune_loss_plot_container") as loss_plot_container:
+        with gr.Column(
+                visible=False,
+                elem_id="finetune_loss_plot_container"
+        ) as loss_plot_container:
             loss_plot = gr.Plot(
                 visible=False, show_label=False,
                 elem_id="finetune_loss_plot")
 
         training_indicator = gr.HTML(
-            "training_indicator", visible=False, elem_id="finetune_training_indicator")
+            "training_indicator",
+            visible=False,
+            elem_id="finetune_training_indicator"
+        )
 
         train_start = train_btn.click(
             fn=do_train,
-            inputs=(dataset_inputs + finetune_args + [
-                model_name,
-                continue_from_model,
-                continue_from_checkpoint,
-            ]),
-            outputs=[train_status, training_indicator,
-                     loss_plot_container, loss_plot]
-        )
+            inputs=(dataset_inputs + finetune_args + [model_name, continue_from_model, continue_from_checkpoint]),
+            outputs=[train_status, training_indicator, loss_plot_container, loss_plot])
 
         # controlled by JS, shows the confirm_abort_button
-        abort_button.click(None, None, None, None)
+        abort_button.click(
+            None,
+            None,
+            None,
+            None
+        )
         confirm_abort_button.click(
             fn=do_abort_training,
             inputs=None, outputs=None,
@@ -816,12 +985,22 @@ def finetune_ui():
         outputs=[loss_plot_container, loss_plot],
         every=10
     )
-    finetune_ui_blocks.load(_js=relative_read_file(__file__, "script.js"))
+    finetune_ui_blocks.load(
+        _js=relative_read_file(
+            __file__,
+            "script.js"
+        )
+    )
 
     # things_that_might_timeout.append(training_status_updates)
     stop_timeoutable_btn = gr.Button(
         "stop not-responding elements",
         elem_id="inference_stop_timeoutable_btn",
-        elem_classes="foot_stop_timeoutable_btn")
+        elem_classes="foot_stop_timeoutable_btn"
+    )
     stop_timeoutable_btn.click(
-        fn=None, inputs=None, outputs=None, cancels=things_that_might_timeout)
+        fn=None,
+        inputs=None,
+        outputs=None,
+        cancels=things_that_might_timeout
+    )
