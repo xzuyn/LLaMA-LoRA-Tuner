@@ -38,15 +38,17 @@ def train(
     gradient_accumulation_steps: int = 32,
     num_train_epochs: int = 3,
     learning_rate: float = 3e-4,
-    cutoff_len: int = 256,
+    cutoff_len: int = 512,
     val_set_size: int = 2000,
     # lora hyperparams
-    lora_r: int = 8,
+    lora_r: int = 16,
     lora_alpha: int = 16,
     lora_dropout: float = 0.05,
     lora_target_modules: List[str] = [
         "q_proj",
+        "k_proj",
         "v_proj",
+        "o_proj",
     ],
     lora_modules_to_save: Union[List[str], None] = [],
     # llm hyperparams
