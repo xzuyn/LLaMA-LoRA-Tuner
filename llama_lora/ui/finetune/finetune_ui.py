@@ -316,7 +316,7 @@ def handle_load_params_from_model(
     )
 
 
-default_lora_target_module_choices = ["q_proj", "k_proj", "v_proj", "o_proj"]
+default_lora_target_module_choices = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
 default_lora_modules_to_save_choices = ["model.embed_tokens", "lm_head"]
 
 
@@ -569,7 +569,7 @@ def finetune_ui():
                     minimum=1,
                     maximum=100,
                     step=1,
-                    value=3,
+                    value=1,
                     label="Epochs",
                     info="The number of times to iterate over the entire training dataset. "
                          "A larger number of epochs may improve model performance but also increase the risk of "
@@ -813,13 +813,13 @@ def finetune_ui():
                         logging_steps = gr.Number(
                             label="Logging Steps",
                             precision=0,
-                            value=10,
+                            value=250,
                             elem_id="finetune_logging_steps"
                         )
                         save_steps = gr.Number(
                             label="Steps Per Save",
                             precision=0,
-                            value=500,
+                            value=10000,
                             elem_id="finetune_save_steps"
                         )
                         save_total_limit = gr.Number(
