@@ -11,7 +11,6 @@ import torch
 import transformers
 from datasets import Dataset, load_dataset
 
-
 from peft import (
     LoraConfig,
     get_peft_model,
@@ -23,59 +22,59 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, LlamaTokenizer
 
 
 def train(
-    # model/data params
-    base_model: Any,
-    tokenizer: Any,
-    output_dir: str,
-    train_data: List[Any],
-    #
-    load_in_8bit=True,
-    fp16=True,
-    bf16=False,
-    gradient_checkpointing=False,
-    # training hyperparams
-    micro_batch_size: int = 4,
-    gradient_accumulation_steps: int = 32,
-    num_train_epochs: int = 3,
-    learning_rate: float = 3e-4,
-    cutoff_len: int = 512,
-    val_set_size: int = 2000,
-    # lora hyperparams
-    lora_r: int = 16,
-    lora_alpha: int = 16,
-    lora_dropout: float = 0.05,
-    lora_target_modules: List[str] = [
-        "q_proj",
-        "k_proj",
-        "v_proj",
-        "o_proj",
-    ],
-    lora_modules_to_save: Union[List[str], None] = [],
-    # llm hyperparams
-    train_on_inputs: bool = True,  # if False, masks out inputs in loss
-    group_by_length: bool = False,  # faster, but produces an odd training loss curve
-    # either training checkpoint or final adapter
-    resume_from_checkpoint=None,
-    save_steps: int = 200,
-    save_total_limit: int = 3,
-    logging_steps: int = 10,
-    #
-    additional_training_arguments: Union[dict, str, None] = None,
-    additional_lora_config: Union[dict, str, None] = None,
-    # logging
-    callbacks: List[Any] = [],
-    # wandb params
-    wandb_api_key=None,
-    wandb_project: str = "",
-    wandb_group=None,
-    wandb_run_name: str = "",
-    wandb_tags: List[str] = [],
-    wandb_watch: str = "false",  # options: false | gradients | all
-    wandb_log_model: str = "true",  # options: false | true
-    additional_wandb_config: Union[dict, None] = None,
-    hf_access_token: Union[str, None] = None,
-    status_message_callback: Any = None,
-    params_info_callback: Any = None,
+        # model/data params
+        base_model: Any,
+        tokenizer: Any,
+        output_dir: str,
+        train_data: List[Any],
+        #
+        load_in_8bit=True,
+        fp16=True,
+        bf16=False,
+        gradient_checkpointing=False,
+        # training hyperparams
+        micro_batch_size: int = 4,
+        gradient_accumulation_steps: int = 32,
+        num_train_epochs: int = 3,
+        learning_rate: float = 3e-4,
+        cutoff_len: int = 512,
+        val_set_size: int = 2000,
+        # lora hyperparams
+        lora_r: int = 16,
+        lora_alpha: int = 16,
+        lora_dropout: float = 0.05,
+        lora_target_modules: List[str] = [
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+        ],
+        lora_modules_to_save: Union[List[str], None] = [],
+        # llm hyperparams
+        train_on_inputs: bool = True,  # if False, masks out inputs in loss
+        group_by_length: bool = False,  # faster, but produces an odd training loss curve
+        # either training checkpoint or final adapter
+        resume_from_checkpoint=None,
+        save_steps: int = 200,
+        save_total_limit: int = 3,
+        logging_steps: int = 10,
+        #
+        additional_training_arguments: Union[dict, str, None] = None,
+        additional_lora_config: Union[dict, str, None] = None,
+        # logging
+        callbacks: List[Any] = [],
+        # wandb params
+        wandb_api_key=None,
+        wandb_project: str = "",
+        wandb_group=None,
+        wandb_run_name: str = "",
+        wandb_tags: List[str] = [],
+        wandb_watch: str = "false",  # options: false | gradients | all
+        wandb_log_model: str = "true",  # options: false | true
+        additional_wandb_config: Union[dict, None] = None,
+        hf_access_token: Union[str, None] = None,
+        status_message_callback: Any = None,
+        params_info_callback: Any = None,
 ):
     if status_message_callback:
         cb_result = status_message_callback("Preparing...")
@@ -143,7 +142,9 @@ def train(
     if wandb_api_key:
         os.environ["WANDB_API_KEY"] = wandb_api_key
 
-    # wandb: WARNING Changes to your `wandb` environment variables will be ignored because your `wandb` session has already started. For more information on how to modify your settings with `wandb.init()` arguments, please refer to https://wandb.me/wandb-init.
+    # wandb: WARNING Changes to your `wandb` environment variables will be ignored because your `wandb` session
+    # has already started. For more information on how to modify your settings with `wandb.init()` arguments,
+    # please refer to https://wandb.me/wandb-init.
     # if wandb_project:
     #     os.environ["WANDB_PROJECT"] = wandb_project
     # if wandb_run_name:
@@ -154,7 +155,7 @@ def train(
     if wandb_log_model:
         os.environ["WANDB_LOG_MODEL"] = wandb_log_model
     use_wandb = (wandb_project and len(wandb_project) > 0) or (
-        "WANDB_PROJECT" in os.environ and len(os.environ["WANDB_PROJECT"]) > 0
+            "WANDB_PROJECT" in os.environ and len(os.environ["WANDB_PROJECT"]) > 0
     )
     if use_wandb:
         os.environ['WANDB_MODE'] = "online"
@@ -247,18 +248,21 @@ def train(
     # )
     if tokenizer.pad_token is None:
         print(f"Tokenizer has no pad_token set, setting it to 1.")
-        tokenizer.pad_token_id = 1
+        tokenizer.pad_token_id = 0
     tokenizer.padding_side = "left"  # Allow batched inference
 
     try:
         model = prepare_model_for_int8_training(model)
     except Exception as e:
         print(
-            f"Got error while running prepare_model_for_int8_training(model), maybe the model has already be prepared. Original error: {e}.")
+            f"Got error while running prepare_model_for_int8_training(model), "
+            f"maybe the model has already be prepared. Original error: {e}."
+        )
 
     if status_message_callback:
         cb_result = status_message_callback(
-            "Preparing PEFT model for training...")
+            "Preparing PEFT model for training..."
+        )
         if cb_result:
             return
 
@@ -307,12 +311,14 @@ def train(
         if param.requires_grad:
             trainable_params += param.numel()
     print(
-        f"trainable params: {trainable_params} || all params: {all_params} || trainable%: {100 * trainable_params / all_params} (calculated)"
+        f"trainable params: {trainable_params} || "
+        f"all params: {all_params} || "
+        f"trainable%: {100 * trainable_params / all_params} (calculated)"
     )
     model.print_trainable_parameters()
     if use_wandb and wandb:
         wandb.config.update({"model": {"all_params": all_params, "trainable_params": trainable_params,
-                            "trainable%": 100 * trainable_params / all_params}})
+                                       "trainable%": 100 * trainable_params / all_params}})
     if params_info_callback:
         cb_result = params_info_callback(
             all_params=all_params, trainable_params=trainable_params)
@@ -324,7 +330,7 @@ def train(
         if cb_result:
             return
 
-    def tokenize(prompt, add_eos_token=True):
+    def tokenize(prompt, add_eos_token=True, add_bos_token=True):
         # there's probably a way to do this with the tokenizer settings
         # but again, gotta move fast
         result = tokenizer(
@@ -335,9 +341,16 @@ def train(
             return_tensors=None,
         )
         if (
-            result["input_ids"][-1] != tokenizer.eos_token_id
-            and len(result["input_ids"]) < cutoff_len
-            and add_eos_token
+                result["input_ids"][0] != tokenizer.bos_token_id
+                and len(result["input_ids"]) < cutoff_len
+                and add_bos_token
+        ):
+            result["input_ids"].insert(0, tokenizer.bos_token_id)
+            result["attention_mask"].insert(0, 1)
+        if (
+                result["input_ids"][-1] != tokenizer.eos_token_id
+                and len(result["input_ids"]) < cutoff_len
+                and add_eos_token
         ):
             result["input_ids"].append(tokenizer.eos_token_id)
             result["attention_mask"].append(1)
@@ -351,14 +364,10 @@ def train(
         tokenized_full_prompt = tokenize(full_prompt)
         if not train_on_inputs:
             user_prompt = data_point["prompt"]
-            tokenized_user_prompt = tokenize(user_prompt, add_eos_token=False)
+            tokenized_user_prompt = tokenize(user_prompt, add_eos_token=False, add_bos_token=False)
             user_prompt_len = len(tokenized_user_prompt["input_ids"])
 
-            tokenized_full_prompt["labels"] = [
-                -100
-            ] * user_prompt_len + tokenized_full_prompt["labels"][
-                user_prompt_len:
-            ]  # could be sped up, probably
+            tokenized_full_prompt["labels"] = [-100] * user_prompt_len + tokenized_full_prompt["labels"][user_prompt_len:]  # could be sped up, probably
         return tokenized_full_prompt
 
     # If train_data is a list, convert it to datasets.Dataset
