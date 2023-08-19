@@ -247,7 +247,7 @@ def train(
     #     0  # unk. we want this to be different from the eos token
     # )
     if tokenizer.pad_token is None:
-        print(f"Tokenizer has no pad_token set, setting it to 1.")
+        print(f"Tokenizer has no pad_token set, setting it to 0.")
         tokenizer.pad_token_id = 0
     tokenizer.padding_side = "left"  # Allow batched inference
 
@@ -345,15 +345,27 @@ def train(
                 and len(result["input_ids"]) < cutoff_len
                 and add_bos_token
         ):
+            # print("bos_section")
+            # print("Before: " + str(result["input_ids"]))
             result["input_ids"].insert(0, tokenizer.bos_token_id)
+            # print("After: " + str(result["input_ids"]))
+            # print("Before: " + str(result["attention_mask"]))
             result["attention_mask"].insert(0, 1)
+            # print("After: " + str(result["attention_mask"]))
         if (
                 result["input_ids"][-1] != tokenizer.eos_token_id
                 and len(result["input_ids"]) < cutoff_len
                 and add_eos_token
         ):
+            # print("eos_section")
+            # print("Before: " + str(result["input_ids"]))
             result["input_ids"].append(tokenizer.eos_token_id)
+            # print("After: " + str(result["input_ids"]))
+            # print("Before: " + str(result["attention_mask"]))
             result["attention_mask"].append(1)
+            # print("After: " + str(result["attention_mask"]))
+
+        # sys.exit() # for testing
 
         result["labels"] = result["input_ids"].copy()
 
